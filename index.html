@@ -15,6 +15,34 @@
     background:#fff;
     border-top:1px solid #ccc;
   }
+
+  /* 🎉 MODAL */
+  #modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+  }
+
+  #modalContent {
+    background: #fff;
+    padding: 20px 30px;
+    width: 300px;
+    margin: 150px auto;
+    text-align: center;
+    border-radius: 8px;
+    position: relative;
+  }
+
+  #closeModal {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 18px;
+  }
 </style>
 </head>
 
@@ -29,6 +57,15 @@
 </div>
 
 <div id="directions"></div>
+
+<!-- 🎉 MODAL -->
+<div id="modal">
+  <div id="modalContent">
+    <span id="closeModal">✖</span>
+    <h2>🎉 Tebrikler!</h2>
+    <p>Varış noktasına ulaştınız.</p>
+  </div>
+</div>
 
 <script>
 let map;
@@ -78,6 +115,10 @@ function initMap() {
       moveTaxi();
     }
   });
+
+  document.getElementById("closeModal").onclick = () => {
+    document.getElementById("modal").style.display = "none";
+  };
 }
 
 function resetAll() {
@@ -95,6 +136,7 @@ function resetAll() {
   document.getElementById("directions").innerHTML = "";
   document.getElementById("roadDistance").innerText = "-";
   document.getElementById("airDistance").innerText = "-";
+  document.getElementById("modal").style.display = "none";
 }
 
 function drawRoute() {
@@ -118,8 +160,14 @@ function drawRoute() {
 
 function moveTaxi() {
   if (!taxiMarker || taxiIndex >= routePath.length - 1) return;
+
   taxiIndex++;
   taxiMarker.setPosition(routePath[taxiIndex]);
+
+  // 🎯 VARIŞ KONTROLÜ
+  if (taxiIndex === routePath.length - 1) {
+    document.getElementById("modal").style.display = "block";
+  }
 }
 
 function placeTaxi(position) {
@@ -127,7 +175,7 @@ function placeTaxi(position) {
     position,
     map,
     icon: {
-      url: "https://cdn-icons-png.flaticon.com/512/743/743007.png",
+      url: "https://cdn-icons-png.flaticon.com/128/10473/10473321.png",
       scaledSize: new google.maps.Size(40, 40)
     }
   });
