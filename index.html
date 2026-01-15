@@ -148,3 +148,23 @@ function drawAirLine() {
     strokeColor: "#ff00aa",
     strokeOpacity: 1,
     strokeWeight: 2,
+    map
+  });
+}
+
+function showDirections(steps) {
+  const div = document.getElementById("directions");
+  div.innerHTML = "<h3>Yol Tarifi</h3>";
+  steps.forEach((s, i) => {
+    div.innerHTML += `<p>${i+1}. ${s.instructions} (${s.distance.text})</p>`;
+  });
+}
+</script>
+
+<script
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWoyRoh93RJfM7V3PLWzzckfH9yUBqU0c&libraries=geometry&callback=initMap"
+  async defer>
+</script>
+
+</body>
+</html>
