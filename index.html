@@ -5,24 +5,15 @@
 <title>TaxiCap</title>
 
 <style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-  }
-  #map {
-    height: 70vh;
-    width: 100%;
-  }
-  #info {
-    padding: 10px;
-    background: #f3f3f3;
-  }
+  body { margin:0; font-family: Arial, sans-serif; }
+  #map { height: 70vh; width: 100%; }
+  #info { padding:10px; background:#f2f2f2; }
   #directions {
-    max-height: 200px;
-    overflow-y: auto;
-    padding: 10px;
-    background: #fff;
-    border-top: 1px solid #ccc;
+    max-height:200px;
+    overflow-y:auto;
+    padding:10px;
+    background:#fff;
+    border-top:1px solid #ccc;
   }
 </style>
 </head>
@@ -42,6 +33,7 @@
 <script>
 let map;
 let points = [];
+let markers = [];
 let directionsService;
 let directionsRenderer;
 let airLine;
@@ -64,10 +56,15 @@ function initMap() {
   directionsRenderer.setMap(map);
 
   map.addListener("click", (e) => {
-    if (points.length === 2) resetMap();
+    if (points.length === 2) resetAll();
 
     points.push(e.latLng);
-    new google.maps.Marker({ position: e.latLng, map });
+
+    const marker = new google.maps.Marker({
+      position: e.latLng,
+      map: map
+    });
+    markers.push(marker);
 
     if (points.length === 2) {
       drawRoute();
@@ -75,7 +72,6 @@ function initMap() {
     }
   });
 
-  // 🔒 SPACE ZOOM ENGELLEME
   window.addEventListener("keydown", (e) => {
     if (e.code === "Space") {
       e.preventDefault();
@@ -84,14 +80,21 @@ function initMap() {
   });
 }
 
-function resetMap() {
+function resetAll() {
   points = [];
   routePath = [];
   taxiIndex = 0;
-  directionsRenderer.set("directions", null);
+
+  markers.forEach(m => m.setMap(null));
+  markers = [];
+
   if (airLine) airLine.setMap(null);
   if (taxiMarker) taxiMarker.setMap(null);
+
+  directionsRenderer.set("directions", null);
   document.getElementById("directions").innerHTML = "";
+  document.getElementById("roadDistance").innerText = "-";
+  document.getElementById("airDistance").innerText = "-";
 }
 
 function drawRoute() {
@@ -107,23 +110,15 @@ function drawRoute() {
       document.getElementById("roadDistance").innerText = leg.distance.text;
 
       showDirections(leg.steps);
-      extractRoutePath(result);
+      routePath = result.routes[0].overview_path;
       placeTaxi(routePath[0]);
     }
   });
 }
 
-function extractRoutePath(result) {
-  routePath = [];
-  result.routes[0].overview_path.forEach(p => routePath.push(p));
-}
-
 function moveTaxi() {
-  if (!taxiMarker || routePath.length === 0) return;
-
+  if (!taxiMarker || taxiIndex >= routePath.length - 1) return;
   taxiIndex++;
-  if (taxiIndex >= routePath.length) return;
-
   taxiMarker.setPosition(routePath[taxiIndex]);
 }
 
@@ -132,7 +127,7 @@ function placeTaxi(position) {
     position,
     map,
     icon: {
-      url: "https://maps.gstatic.com/intl/en_us/mapfiles/ms/micons/pink.png",
+      url: "https://cdn-icons-png.flaticon.com/512/743/743007.png",
       scaledSize: new google.maps.Size(40, 40)
     }
   });
@@ -153,23 +148,3 @@ function drawAirLine() {
     strokeColor: "#ff00aa",
     strokeOpacity: 1,
     strokeWeight: 2,
-    map
-  });
-}
-
-function showDirections(steps) {
-  const div = document.getElementById("directions");
-  div.innerHTML = "<h3>Yol Tarifi</h3>";
-  steps.forEach((s, i) => {
-    div.innerHTML += `<p>${i+1}. ${s.instructions} (${s.distance.text})</p>`;
-  });
-}
-</script>
-
-<script
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWoyRoh93RJfM7V3PLWzzckfH9yUBqU0c&libraries=geometry&callback=initMap"
-  async defer>
-</script>
-
-</body>
-</html>
